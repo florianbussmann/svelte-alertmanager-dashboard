@@ -3,6 +3,8 @@
     import CircleCheckFilledIcon from "@tabler/icons-svelte/icons/circle-check-filled";
     import ExclamationCircleFilled from "@tabler/icons-svelte/icons/exclamation-circle-filled";
 
+    import DataTable from "./data-table.svelte";
+
     import { onMount } from "svelte";
     import { invalidate } from "$app/navigation";
 
@@ -25,6 +27,7 @@
 
     export let data: {
         alertmanagerUrl: string;
+        clusterStatus: string;
         statusData: {
             cluster: {
                 status: string;
@@ -34,26 +37,29 @@
                 original: string;
             };
         } | null;
+        alerts: any[];
         refreshedAt: string;
         error?: string;
     };
-
-    $: status = data.statusData?.cluster.status || "down";
 </script>
 
 <a
     href={data.alertmanagerUrl}
     target="_blank"
     class={badgeVariants({
-        variant: status == "ready" ? "outline" : "destructive",
+        variant: data.clusterStatus == "ready" ? "outline" : "destructive",
     })}
 >
-    {#if status != "ready"}
+    {#if data.clusterStatus != "ready"}
         <ExclamationCircleFilled />
     {:else}
         <CircleCheckFilledIcon class="fill-green-500 dark:fill-green-400" />
     {/if}
-    <span class="pl-1">{status}</span></a
+    <span class="pl-1">{data.clusterStatus}</span></a
 >
 
-<p>Last refreshed at: {data.refreshedAt}</p>
+{console.log(data.alerts)}
+
+<div class="w-full items-center justify-center px-4 actions">
+    <DataTable data={data.alerts} timestamp={data.refreshedAt} />
+</div>
