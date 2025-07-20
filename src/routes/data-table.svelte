@@ -8,27 +8,23 @@
     import {
         createSvelteTable,
         FlexRender,
+        renderComponent,
         renderSnippet,
     } from "$lib/components/ui/data-table/index.js";
     import * as Table from "$lib/components/ui/table/index.js";
     import CircleCheckFilledIcon from "@tabler/icons-svelte/icons/circle-check-filled";
     import ExclamationCircleFilled from "@tabler/icons-svelte/icons/exclamation-circle-filled";
-
-    // This type is used to define the shape of our data.
-    // You can use a Zod schema here if you want.
-    export type Alert = {
-        fingerprint: string;
-        labels: {
-            alertname: string;
-            instance: string;
-            severity: string;
-        };
-        status: {
-            state: string;
-        };
-    };
+    import type { Alert } from "$lib/schema";
+    import DataTableCellViewer from "./data-table-cell-viewer.svelte";
 
     export const columns: ColumnDef<Alert>[] = [
+        {
+            accessorKey: "fingerprint",
+            header: "Fingerprint",
+            cell: ({ row }) =>
+                renderComponent(DataTableCellViewer, { item: row.original }),
+            enableHiding: false,
+        },
         {
             accessorKey: "labels.alertname",
             header: "Alert",
