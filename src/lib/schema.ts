@@ -15,4 +15,5 @@ export type Alert = {
     status: {
         state: string;
     };
+    updatedAt: string;
 };
