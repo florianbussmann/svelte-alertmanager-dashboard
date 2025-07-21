@@ -39,6 +39,7 @@
 	"dependencies": {
 		"@sveltejs/adapter-node": "^5.2.13",
 		"@tabler/icons-svelte": "^3.34.0",
+		"date-fns": "^4.1.0",
 		"dotenv": "^17.2.0"
 	}
 }

@@ -16,6 +16,21 @@
     import ExclamationCircleFilled from "@tabler/icons-svelte/icons/exclamation-circle-filled";
     import type { Alert } from "$lib/schema";
     import DataTableCellViewer from "./data-table-cell-viewer.svelte";
+    import { formatDistance, formatRelative, addSeconds } from "date-fns";
+
+    function timestampColumn<K extends keyof Alert>(
+        accessorKey: K,
+        header: string,
+    ) {
+        return {
+            accessorKey,
+            header,
+            cell: ({ row }: { row: Row<Alert> }) =>
+                renderSnippet(DataTableTimestamp, {
+                    rowTimestamp: row.original[accessorKey] as string,
+                }),
+        };
+    }
 
     export const columns: ColumnDef<Alert>[] = [
         {
@@ -43,10 +58,8 @@
             header: "Status",
             cell: ({ row }) => renderSnippet(DataTableStatus, { row }),
         },
-        {
-            accessorKey: "updatedAt",
-            header: "Updated at",
-        },
+        timestampColumn("startsAt" as keyof Alert, "Detected"),
+        timestampColumn("updatedAt" as keyof Alert, "Last checked"),
     ];
 
     let { data, timestamp }: { data: Alert[] } & { timestamp: string } =
@@ -85,10 +98,22 @@
     </Badge>
 {/snippet}
 
+{#snippet DataTableTimestamp({ rowTimestamp }: { rowTimestamp: string })}
+    <div class="w-16">
+        {formatDistance(rowTimestamp, timestamp, {
+            addSuffix: true,
+        })}
+    </div>
+{/snippet}
+
 <div class="rounded-md border">
     <Table.Root>
         <Table.Caption>
-            Last refreshed at: {timestamp}
+            Last refreshed {formatRelative(timestamp, new Date())} ({formatDistance(
+                timestamp,
+                addSeconds(new Date(), 30),
+                { addSuffix: true },
+            )})
         </Table.Caption>
         <Table.Header class="bg-muted sticky top-0 z-10">
             {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
