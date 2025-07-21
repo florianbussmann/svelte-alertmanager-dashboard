@@ -18,6 +18,20 @@
     import DataTableCellViewer from "./data-table-cell-viewer.svelte";
     import { formatDistance, formatRelative, addSeconds } from "date-fns";
 
+    function timestampColumn<K extends keyof Alert>(
+        accessorKey: K,
+        header: string,
+    ) {
+        return {
+            accessorKey,
+            header,
+            cell: ({ row }: { row: Row<Alert> }) =>
+                renderSnippet(DataTableTimestamp, {
+                    rowTimestamp: row.original[accessorKey] as string,
+                }),
+        };
+    }
+
     export const columns: ColumnDef<Alert>[] = [
         {
             accessorKey: "fingerprint",
@@ -44,14 +58,8 @@
             header: "Status",
             cell: ({ row }) => renderSnippet(DataTableStatus, { row }),
         },
-        {
-            accessorKey: "updatedAt",
-            header: "Updated at",
-            cell: ({ row }: { row: Row<Alert> }) =>
-                formatDistance(row.original.updatedAt, timestamp, {
-                    addSuffix: true,
-                }),
-        },
+        timestampColumn("startsAt" as keyof Alert, "Detected"),
+        timestampColumn("updatedAt" as keyof Alert, "Last checked"),
     ];
 
     let { data, timestamp }: { data: Alert[] } & { timestamp: string } =
@@ -88,6 +96,14 @@
         {/if}
         <span class="pl-1">{row.original.status.state}</span>
     </Badge>
+{/snippet}
+
+{#snippet DataTableTimestamp({ rowTimestamp }: { rowTimestamp: string })}
+    <div class="w-16">
+        {formatDistance(rowTimestamp, timestamp, {
+            addSuffix: true,
+        })}
+    </div>
 {/snippet}
 
 <div class="rounded-md border">
