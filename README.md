@@ -3,6 +3,8 @@
 Alert dashboard for
 [Prometheus Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) using [SvelteKit](https://svelte.dev/) and [shadcn](https://www.shadcn-svelte.com/).
 
+![Alert cell view](docs/images/alert-details.gif)
+
 ## Contributing
 
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
