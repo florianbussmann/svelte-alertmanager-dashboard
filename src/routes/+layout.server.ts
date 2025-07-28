@@ -2,6 +2,8 @@ import type { PageServerLoad } from './$types';
 import dotenv from 'dotenv';
 dotenv.config();
 
+let alertCache = new Map<string, any>();
+
 export const prerender = false;
 
 export const load: PageServerLoad = async ({ depends }) => {
@@ -20,7 +22,7 @@ export const load: PageServerLoad = async ({ depends }) => {
 
         const clusterStatus = statusJson.cluster?.status ?? 'down';
 
-        let alerts = [];
+        let currentAlerts = [];
         // Fetch alerts only if status is "ready"
         if (clusterStatus === 'ready') {
             try {
@@ -28,16 +30,33 @@ export const load: PageServerLoad = async ({ depends }) => {
                     headers: { 'Cache-Control': 'no-cache' }
                 });
                 const alertsJson = await alertsRes.json();
-                alerts = alertsJson ?? [];
+                currentAlerts = alertsJson ?? [];
             } catch (err) {
                 console.error('Failed to fetch alerts:', err);
             }
         }
+
+        const activeIds = new Set<string>();
+        for (const alert of currentAlerts) {
+            const id = `${alert.labels.alertname}-${alert.startsAt}`;
+            activeIds.add(id);
+            alertCache.set(id, { ...alert });
+        }
+
+        // Mark previously seen alerts as resolved if they disappeared
+        for (const [id, alert] of alertCache) {
+            if (!activeIds.has(id)) {
+                alertCache.set(id, { ...alert, status: { state: "resolved" } });
+            }
+        }
+
+        const cachedAlerts = Array.from(alertCache.values());
+
         return {
             alertmanagerUrl: baseUrl,
             clusterStatus: clusterStatus,
             statusData: statusJson,
-            alerts: alerts,
+            alerts: cachedAlerts,
             refreshedAt: new Date().toISOString(),
         };
     } catch (err) {
