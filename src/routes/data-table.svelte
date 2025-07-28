@@ -133,7 +133,7 @@
         </Table.Header>
         <Table.Body class="**:data-[slot=table-cell]:first:w-8">
             {#each table.getRowModel().rows as row (row.id)}
-                <Table.Row data-state={row.getIsSelected() && "selected"}>
+                <Table.Row data-state={row.getIsSelected() && "selected"} style="opacity: {row.original.status.state == "resolved" ? 0.5 : 1}">
                     {#each row.getVisibleCells() as cell (cell.id)}
                         <Table.Cell>
                             <FlexRender
